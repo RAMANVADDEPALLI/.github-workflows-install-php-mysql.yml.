@@ -1,0 +1,38 @@
+name: Install Ubuntu with PHP & MySQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update and Install PHP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php php-mysql php-cli php-mbstring php-xml php-curl php-zip php-gd
+          php -v  # Display PHP version to verify installation
+
+      - name: Install MySQL Server
+        run: |
+          sudo apt-get install -y mysql-server
+          sudo service mysql start
+          mysql --version  # Display MySQL version to verify installation
+
+      - name: Configure MySQL
+        run: |
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'root';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+          echo "MySQL root password set to 'root'"
+
+      - name: Create WordPress Database
+        run: |
+          mysql -u root -proot -e "CREATE DATABASE wordpress;"
+          mysql -u root -proot -e "SHOW DATABASES;"
